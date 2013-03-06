@@ -7,7 +7,8 @@ LDFLAGS=$(shell root-config --ldflags)
 ROOTCINT=rootcint
 
 NAME=LendaEvent
-LIBRARY= $(addsuffix Lib.so,$(NAME))
+temp= $(addprefix lib,$(NAME))
+LIBRARY= $(addsuffix .so,$(temp))
 DICTNAME=$(addsuffix Dictionary,$(NAME))
 DICTOBJ=$(addsuffix .o,$(DICTNAME))
 OBJECTS=$(addsuffix .o, $(NAME))
@@ -20,6 +21,7 @@ $(LIBRARY) : $(DICTOBJ) $(OBJECTS)
 	@echo "Building Library"
 	@$(CXX) `root-config --cflags` -fPIC -shared -Wl -o $@ $^;
 	@echo "Build succeed"
+
 %Dictionary.o : %.hh %LinkDef.h
 	@echo "Generating Dictionary"
 	@$(ROOTCINT) -f $(patsubst %.o,%.cc,$@) -c $^;
