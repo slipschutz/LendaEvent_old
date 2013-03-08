@@ -13,6 +13,8 @@ public:
   void Finalize();
 
   Double_t Time_Diff;
+  Double_t ShiftT_Diff;
+
   vector <Double_t> times;
   vector <Double_t> energies;
   vector <Double_t> channels;
@@ -21,11 +23,9 @@ public:
   
 
   vector <Double_t> shiftCorrectedTimes;
+  vector <Double_t> liqCorrectedTimes;
 
 
-  Double_t times2[3];
-  Double_t energies2[3];
-  Double_t channels2[3];
   
 
   vector <Double_t> shortGates;
@@ -44,10 +44,12 @@ public:
 
   void pushShiftCorrections(Double_t,Double_t);
 
+  void pushLiqCorrections(Double_t,Double_t);
+
 
 
 public:
-  ClassDef(LendaEvent, 1);
+  ClassDef(LendaEvent, 2);
 };
 
 #endif
