@@ -11,10 +11,20 @@ public:
   LendaEvent();
   void Clear();
   void Finalize();
+  //Convenient quantities
+  Double_t TOF;
+  Double_t ShiftDt;
+  Double_t ShiftTOF;
+  Double_t Dt;
+  Double_t PulseShape; //long gate over short gate
 
-  Double_t Time_Diff;
-  Double_t ShiftT_Diff;
+  //Corecction 
+  Double_t sdt1,sdt2;
+  vector <Double_t> gainCorrections;
+  
 
+  
+  vector <Double_t> energiesCor;
   vector <Double_t> times;
   vector <Double_t> energies;
   vector <Double_t> channels;
@@ -25,14 +35,8 @@ public:
   vector <Double_t> shiftCorrectedTimes;
   vector <Double_t> liqCorrectedTimes;
 
-
-  
-
   vector <Double_t> shortGates;
   vector <Double_t> longGates;
-
-
-
 
   void pushLongGate(Double_t);
   void pushShortGate(Double_t);
@@ -42,14 +46,17 @@ public:
   void pushChannel(Double_t);
   void pushTrace (vector <UShort_t>);
 
-  void pushShiftCorrections(Double_t,Double_t);
-
+  inline void setShiftCorrections(Double_t c1,Double_t c2){sdt1=c1;sdt2=c2;}
+  inline void setGainCorrections(vector <Double_t> in){gainCorrections=in;}
   void pushLiqCorrections(Double_t,Double_t);
-
-
+  
+private:
+  void shiftCor();
+  void gainCor();
+  
 
 public:
-  ClassDef(LendaEvent, 2);
+  ClassDef(LendaEvent, 3);
 };
 
 #endif
