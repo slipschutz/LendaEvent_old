@@ -4,6 +4,11 @@
 #include "TObject.h"
 #include "TFile.h"
 #include <vector>
+
+
+
+
+
 using namespace std;
 class LendaEvent : public TObject {
 public:
@@ -23,7 +28,11 @@ public:
   vector <Double_t> gainCorrections;
   
 
-  
+  void MakeC();
+
+  UShort_t *CTrace;
+
+  //Main information holders
   vector <Double_t> energiesCor;
   vector <Double_t> times;
   vector <Double_t> energies;
@@ -38,6 +47,7 @@ public:
   vector <Double_t> shortGates;
   vector <Double_t> longGates;
 
+  //pushign methods
   void pushLongGate(Double_t);
   void pushShortGate(Double_t);
 
@@ -56,7 +66,7 @@ private:
   
 
 public:
-  ClassDef(LendaEvent, 3);
+  ClassDef(LendaEvent, 4);
 };
 
 #endif

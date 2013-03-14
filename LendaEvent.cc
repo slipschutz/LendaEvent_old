@@ -4,6 +4,7 @@
 #include <iostream>
 
 
+
 using namespace std;
 
 
@@ -140,5 +141,18 @@ void LendaEvent::Finalize(){
   
 }
 
+void LendaEvent::MakeC(){
+
+  //  CTrace = calloc(sizeof(UShort_t)*traces[0].size());
+
+  CTrace = new UShort_t[traces[1].size()];
+
+  cout<<"Size is "<<traces[1].size()<<endl;
+
+  for (int i=0;i<traces[1].size();++i){
+    CTrace[i]=traces[1][i];
+  }
+
+}
 
 
