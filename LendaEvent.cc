@@ -144,12 +144,17 @@ void LendaEvent::gainCor(){
 void LendaEvent::walkCor(){
   Double_t total=0;
   
+ 
 
   if(energiesCor[0]<400){  
     for(int i=0;i<walkCorrections.size();++i){
       total=total+walkCorrections[i]*TMath::Power(energiesCor[0],i+1);
     }
   }
+  
+  cout<<"total is "<<total<<endl;
+  int t; cin>>t;
+
   walkCorrectedTimes.push_back(shiftCorrectedTimes[0]-total); //spot 0 is changed 
   
   walkCorrectedTimes.push_back(shiftCorrectedTimes[1]);
