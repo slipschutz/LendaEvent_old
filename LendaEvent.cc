@@ -2,7 +2,7 @@
 
 #include "LendaEvent.hh"
 #include <iostream>
-
+#include "TMath.h"
 
 
 using namespace std;
@@ -13,10 +13,25 @@ LendaEvent::LendaEvent()
 {
   sdt1=0;
   sdt2=0;
+  gainCorrections.clear();
+  walkCorrections.clear();
+
   Clear();
   
 
 }
+
+void LendaEvent::setWalkCorrections(vector <Double_t> in){
+  walkCorrections=in;
+
+
+}
+
+void LendaEvent::setGainCorrections(vector <Double_t> in){
+  gainCorrections=in;
+
+}
+
 
 void LendaEvent::Clear(){
 
@@ -24,7 +39,11 @@ void LendaEvent::Clear(){
   ShiftDt=BAD_NUM;
   ShiftTOF=BAD_NUM;
   Dt=BAD_NUM;
+  GOE=BAD_NUM;
+  CorGOE=BAD_NUM;
   PulseShape=BAD_NUM;
+  TOFW1=BAD_NUM;
+
   times.clear();
   energies.clear();
   energiesCor.clear();
@@ -34,9 +53,10 @@ void LendaEvent::Clear(){
   shortGates.clear();
   longGates.clear();
 
+  //REMEBER TO CLEAR THINGS THAT were thing.push_Back!!!!
   shiftCorrectedTimes.clear();
   liqCorrectedTimes.clear();
-  
+  walkCorrectedTimes.clear();
 
 }
 
@@ -121,23 +141,49 @@ void LendaEvent::gainCor(){
 
 }
 
+void LendaEvent::walkCor(){
+  Double_t total=0;
+  
+
+  if(energiesCor[0]<400){  
+    for(int i=0;i<walkCorrections.size();++i){
+      total=total+walkCorrections[i]*TMath::Power(energiesCor[0],i+1);
+    }
+  }
+  walkCorrectedTimes.push_back(shiftCorrectedTimes[0]-total); //spot 0 is changed 
+  
+  walkCorrectedTimes.push_back(shiftCorrectedTimes[1]);
+  walkCorrectedTimes.push_back(shiftCorrectedTimes[2]);
+
+}
+
 
 void LendaEvent::Finalize(){
 
-  shiftCor();
-  
+  shiftCor();//make the shiftCorrectedTimes
+
+
+ 
   if (gainCorrections.size()!=0)//only apply gain correctins if 
     gainCor();                   //they have be provided
+
+
 
   TOF = 0.5*(times[0]+times[1])-times[2];
   ShiftDt=(shiftCorrectedTimes[0]-shiftCorrectedTimes[1]);
   ShiftTOF=0.5*(shiftCorrectedTimes[0]+shiftCorrectedTimes[1]) -shiftCorrectedTimes[2];
 
+  walkCor();
+
+  TOFW1=0.5*(walkCorrectedTimes[0]+walkCorrectedTimes[1]) -walkCorrectedTimes[2];
+
+
   PulseShape = longGates[2]/shortGates[2];
 
   Dt = times[0]-times[1];
 
-  
+  GOE = (energies[0]-energies[1])/(energies[0]+energies[1]);
+  CorGOE = (energiesCor[0]-energiesCor[1])/(energiesCor[0]+energiesCor[1]);
   
 }
 

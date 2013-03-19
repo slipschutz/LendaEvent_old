@@ -22,11 +22,9 @@ public:
   Double_t ShiftTOF;
   Double_t Dt;
   Double_t PulseShape; //long gate over short gate
-
-  //Corecction 
-  Double_t sdt1,sdt2;
-  vector <Double_t> gainCorrections;
-  
+  Double_t GOE;
+  Double_t CorGOE;
+  Double_t TOFW1;
 
   void MakeC();
 
@@ -40,9 +38,11 @@ public:
 
   vector < vector <UShort_t> > traces;
   
-
+  
   vector <Double_t> shiftCorrectedTimes;
   vector <Double_t> liqCorrectedTimes;
+
+  vector <Double_t> walkCorrectedTimes;
 
   vector <Double_t> shortGates;
   vector <Double_t> longGates;
@@ -57,16 +57,27 @@ public:
   void pushTrace (vector <UShort_t>);
 
   inline void setShiftCorrections(Double_t c1,Double_t c2){sdt1=c1;sdt2=c2;}
-  inline void setGainCorrections(vector <Double_t> in){gainCorrections=in;}
+  void setGainCorrections(vector <Double_t> in);
+
+  void setWalkCorrections(vector <Double_t> in);
+
+
   void pushLiqCorrections(Double_t,Double_t);
   
 private:
   void shiftCor();
   void gainCor();
-  
+  void walkCor();
+
+  //Corecction 
+  Double_t sdt1,sdt2;
+  vector <Double_t> gainCorrections;
+  vector <Double_t> walkCorrections;
+
+
 
 public:
-  ClassDef(LendaEvent, 4);
+  ClassDef(LendaEvent, 5);
 };
 
 #endif
