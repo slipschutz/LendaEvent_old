@@ -15,21 +15,32 @@ LendaEvent::LendaEvent()
   sdt2=0;
   gainCorrections.clear();
   walkCorrections.clear();
-
+  numOfWalkCorrections=0;
   Clear();
   
 
 }
 
 void LendaEvent::setWalkCorrections(vector <Double_t> in){
-  walkCorrections=in;
+  walkCorrections.clear();
+  walkCorrections.push_back(in);
+  numOfWalkCorrections=0;
+}
 
+void LendaEvent::setWalkCorrections(vector <Double_t> in,Int_t channel){
 
+  if (channel >= (Int_t)walkCorrections.size() ){
+    int diff = channel-walkCorrections.size();
+    walkCorrections.resize( walkCorrections.size()+diff +1);
+  }
+  
+  walkCorrections[channel]=in;
+
+  numOfWalkCorrections++;
 }
 
 void LendaEvent::setGainCorrections(vector <Double_t> in){
   gainCorrections=in;
-
 }
 
 
@@ -42,8 +53,8 @@ void LendaEvent::Clear(){
   GOE=BAD_NUM;
   CorGOE=BAD_NUM;
   PulseShape=BAD_NUM;
-  TOFW1=BAD_NUM;
 
+  TOFW.clear();
   times.clear();
   energies.clear();
   energiesCor.clear();
@@ -53,7 +64,7 @@ void LendaEvent::Clear(){
   shortGates.clear();
   longGates.clear();
 
-  //REMEBER TO CLEAR THINGS THAT were thing.push_Back!!!!
+  ////REMEBER TO CLEAR THINGS THAT were thing.push_Back!!!!
   shiftCorrectedTimes.clear();
   liqCorrectedTimes.clear();
   walkCorrectedTimes.clear();
@@ -78,7 +89,7 @@ void LendaEvent::pushTrace(vector <UShort_t> in){
 
 
 
-void LendaEvent::pushLiqCorrections(Double_t c1,Double_t c2){
+void LendaEvent::pushLiqCorrections(Double_t c1,Double_t c2){ //not in use right now?
   //Liq1 = channel 8
   //Time_Diff  timeDiff = 0.5*(events[0]->time + events[1]->time) - events[2]->time;
  
@@ -107,6 +118,8 @@ void LendaEvent::pushShortGate(Double_t sg){
 
 void LendaEvent::shiftCor(){
 
+  // correction to move the time difference spectrum seen in a lenda bar
+  // to be around 0
   //correction determined from time[0]-time[1]
   //shift applied to time[0]
   if (channels[0]==0 && channels[1] ==1 ) {//one bar
@@ -126,6 +139,8 @@ void LendaEvent::shiftCor(){
 
 void LendaEvent::gainCor(){
 
+  //Applying gain correction to each of the channels for Lenda bars
+  
   energiesCor.resize(energies.size());
   for (int i=0;i<(int)energies.size();i++){
     if (channels[i] == 0)
@@ -142,9 +157,47 @@ void LendaEvent::gainCor(){
 }
 
 void LendaEvent::walkCor(){
-  Double_t total=0;
+  Double_t total[numOfWalkCorrections];
+
+  //copy over the shift corrected times
+  for (int i=0;i<(int)shiftCorrectedTimes.size();i++){
+    walkCorrectedTimes.push_back(shiftCorrectedTimes[i]);
+  }
   
- 
+
+  
+  for (int j=0;j<numOfWalkCorrections;j++){
+    for (int i=0;i<(int)walkCorrections[j].size();i++){
+      if (channels[j] >= walkCorrections.size() ){
+	//a correction has not been specified for this channel yet
+	//so make total =0
+	total[j]=0;
+      }else 
+	total[j]=total[j]+walkCorrections[channels[j]][i]*TMath::Power(energiesCor[channels[j]],i+1);
+    }
+  }
+  Double_t runningTotal=0;
+  for (int j=0;j<numOfWalkCorrections;j++){
+
+    cout<<"Total at j["<<j<<"] is "<<total[j]<<endl;
+    int t; cin>>t;
+    runningTotal = runningTotal +total[j];
+    //    walkCorrectedTimes[j]= walkCorrectedTimes[j]-runningTotal;
+    //TOFW[j]=0.5*(walkCorrectedTimes[0]+walkCorrectedTimes[1]) -walkCorrectedTimes[2];
+    TOFW[j]=ShiftTOF-runningTotal;
+
+  }
+
+  
+
+  /*
+
+  for (int j=0;j<numOfWalkCorrections;j++){
+    cout<<"This is walkCor "<<j<<" it is channel "<<channels[j]<<endl;
+    cout<<total[j]<<endl;
+  }
+
+
 
   if(energiesCor[0]<400){  
     for(int i=0;i<walkCorrections.size();++i){
@@ -159,12 +212,13 @@ void LendaEvent::walkCor(){
   
   walkCorrectedTimes.push_back(shiftCorrectedTimes[1]);
   walkCorrectedTimes.push_back(shiftCorrectedTimes[2]);
-
+  */
 }
 
 
 void LendaEvent::Finalize(){
 
+  TOFW.resize(numOfWalkCorrections);
   shiftCor();//make the shiftCorrectedTimes
 
 
@@ -180,7 +234,7 @@ void LendaEvent::Finalize(){
 
   walkCor();
 
-  TOFW1=0.5*(walkCorrectedTimes[0]+walkCorrectedTimes[1]) -walkCorrectedTimes[2];
+  // TOFW1=0.5*(walkCorrectedTimes[0]+walkCorrectedTimes[1]) -walkCorrectedTimes[2];
 
 
   PulseShape = longGates[2]/shortGates[2];
@@ -200,10 +254,23 @@ void LendaEvent::MakeC(){
 
   cout<<"Size is "<<traces[1].size()<<endl;
 
-  for (int i=0;i<traces[1].size();++i){
+  for (int i=0;i<(int)traces[1].size();++i){
     CTrace[i]=traces[1][i];
   }
 
 }
 
+void LendaEvent::dumpWalkCorrections(){
+
+  for (int j=0;j<(int)walkCorrections.size();++j){
+    int max_i = walkCorrections[j].size();
+    cout<<"walkCorrection["<<j<<"]"<<endl;
+    for (int i=0;i<max_i;++i){
+      cout<<walkCorrections[j][i]<<endl;
+            
+    }
+  }
+  
+
+}
 

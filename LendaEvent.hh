@@ -24,7 +24,7 @@ public:
   Double_t PulseShape; //long gate over short gate
   Double_t GOE;
   Double_t CorGOE;
-  Double_t TOFW1;
+  vector <Double_t> TOFW;
 
   void MakeC();
 
@@ -42,7 +42,7 @@ public:
   vector <Double_t> shiftCorrectedTimes;
   vector <Double_t> liqCorrectedTimes;
 
-  vector <Double_t> walkCorrectedTimes;
+  vector < Double_t>  walkCorrectedTimes;
 
   vector <Double_t> shortGates;
   vector <Double_t> longGates;
@@ -59,21 +59,29 @@ public:
   inline void setShiftCorrections(Double_t c1,Double_t c2){sdt1=c1;sdt2=c2;}
   void setGainCorrections(vector <Double_t> in);
 
-  void setWalkCorrections(vector <Double_t> in);
+  void setWalkCorrections(vector <Double_t> in); //This sets input walkcorrection as the first 
+                                                 //correction in the set walkCorrections[0][i] i goes 
+                                                 //from 1 to degree of correction
 
+  void setWalkCorrections(vector <Double_t> in,Int_t channel); // sets the correction and puts it in the 
+                                                               //walkCorrections[channel][i]
+
+
+  void dumpWalkCorrections();
 
   void pushLiqCorrections(Double_t,Double_t);
-  
+  void walkCor();  
 private:
   void shiftCor();
   void gainCor();
-  void walkCor();
+
 
   //Corecction 
   Double_t sdt1,sdt2;
   vector <Double_t> gainCorrections;
-  vector <Double_t> walkCorrections;
+  vector < vector <Double_t> > walkCorrections; // set of walkCorrections
 
+  int numOfWalkCorrections;
 
 
 public:
