@@ -151,6 +151,8 @@ void LendaEvent::gainCor(){
       energiesCor[i]= energies[i]*gainCorrections[2];
     else if (channels[i] == 3)
       energiesCor[i]= energies[i]*gainCorrections[3];
+    else
+      energiesCor[i]=energies[i];//For the liqscints
   }
 
 
