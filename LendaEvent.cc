@@ -159,13 +159,35 @@ void LendaEvent::gainCor(){
 void LendaEvent::walkCor(){
   Double_t total[numOfWalkCorrections];
 
+  for (int i=0;i<numOfWalkCorrections;i++)
+    total[i]=0;
+
   //copy over the shift corrected times
   for (int i=0;i<(int)shiftCorrectedTimes.size();i++){
     walkCorrectedTimes.push_back(shiftCorrectedTimes[i]);
   }
-  
 
+  //cout<<"numOfWalkCorrections: "<<numOfWalkCorrections<<endl;
+  //cout<<"size "<<walkCorrections[channels[0]].size()<<endl;
+  // cout<<"channels[0]== "<<channels[0]<<endl;
+  // int t;cin>>t;
   
+  for (int j=0;j<numOfWalkCorrections;j++){
+    for (int i=0;i<(int)walkCorrections[channels[j]].size();i++){
+      
+      // cout<<"J is "<<j<<endl;
+      // cout<<"channels[j] "<<channels[j]<<endl;
+      //      cout<<" size is "<<walkCorrections[channels[j]].size()<<endl;
+
+      // cout<<"total[j] before "<<total[j]<<endl;
+      // int t;cin>>t;
+      if (energiesCor[j]<350)
+	total[j]=total[j]+walkCorrections[channels[j]][i]*TMath::Power(energiesCor[j],i+1);
+      //      cout<<"total[j] after "<<total[j]<<endl;
+    }
+  }
+
+  /*
   for (int j=0;j<numOfWalkCorrections;j++){
     for (int i=0;i<(int)walkCorrections[j].size();i++){
       if (channels[j] >= walkCorrections.size() ){
@@ -173,20 +195,23 @@ void LendaEvent::walkCor(){
 	//so make total =0
 	total[j]=0;
       }else 
-	total[j]=total[j]+walkCorrections[channels[j]][i]*TMath::Power(energiesCor[channels[j]],i+1);
+	total[j]=total[j]+walkCorrections[channels[j]][i]*TMath::Power(energiesCor[j],i+1);
     }
-  }
+    }*/
   Double_t runningTotal=0;
   for (int j=0;j<numOfWalkCorrections;j++){
-
-    cout<<"Total at j["<<j<<"] is "<<total[j]<<endl;
-    int t; cin>>t;
-    runningTotal = runningTotal +total[j];
+     runningTotal = runningTotal +total[j];
+     TOFW[j]=ShiftTOF-runningTotal;
+  }
+    
+    //cout<<"Total at j["<<j<<"] is "<<total[j]<<endl;
+    //    int t; cin>>t;
+   
     //    walkCorrectedTimes[j]= walkCorrectedTimes[j]-runningTotal;
     //TOFW[j]=0.5*(walkCorrectedTimes[0]+walkCorrectedTimes[1]) -walkCorrectedTimes[2];
-    TOFW[j]=ShiftTOF-runningTotal;
+  // TOFW[0]=ShiftTOF-total[0];
+  //  TOFW[1]=ShiftTOF-total[0]-total[1];
 
-  }
 
   
 

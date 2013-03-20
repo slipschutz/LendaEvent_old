@@ -70,11 +70,11 @@ public:
   void dumpWalkCorrections();
 
   void pushLiqCorrections(Double_t,Double_t);
-  void walkCor();  
+
 private:
   void shiftCor();
   void gainCor();
-
+  void walkCor();  
 
   //Corecction 
   Double_t sdt1,sdt2;
