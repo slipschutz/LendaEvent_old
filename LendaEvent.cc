@@ -47,6 +47,7 @@ void LendaEvent::setGainCorrections(vector <Double_t> in){
 void LendaEvent::Clear(){
 
   TOF=BAD_NUM;
+  TOF_sub=BAD_NUM;
   ShiftDt=BAD_NUM;
   ShiftTOF=BAD_NUM;
   Dt=BAD_NUM;
@@ -141,7 +142,7 @@ void LendaEvent::gainCor(){
 
   //Applying gain correction to each of the channels for Lenda bars
   
-  energiesCor.resize(energies.size());
+
   for (int i=0;i<(int)energies.size();i++){
     if (channels[i] == 0)
       energiesCor[i]= energies[i]*gainCorrections[0];
@@ -183,7 +184,7 @@ void LendaEvent::walkCor(){
 
       // cout<<"total[j] before "<<total[j]<<endl;
       // int t;cin>>t;
-      if (energiesCor[j]<350)
+      if (energiesCor[j]<180)
 	total[j]=total[j]+walkCorrections[channels[j]][i]*TMath::Power(energiesCor[j],i+1);
       //      cout<<"total[j] after "<<total[j]<<endl;
     }
@@ -203,6 +204,8 @@ void LendaEvent::walkCor(){
   Double_t runningTotal=0;
   for (int j=0;j<numOfWalkCorrections;j++){
      runningTotal = runningTotal +total[j];
+     //     cout<<"This is runningTotal "<<runningTotal<<" this is J "<<j<<endl;
+     // int t ;cin>>t;
      TOFW[j]=ShiftTOF-runningTotal;
   }
     
@@ -245,10 +248,9 @@ void LendaEvent::walkCor(){
 
 void LendaEvent::Finalize(){
 
+  energiesCor.resize(energies.size());
   TOFW.resize(numOfWalkCorrections);
   shiftCor();//make the shiftCorrectedTimes
-
-
  
   if (gainCorrections.size()!=0)//only apply gain correctins if 
     gainCor();                   //they have be provided
@@ -259,10 +261,12 @@ void LendaEvent::Finalize(){
   ShiftDt=(shiftCorrectedTimes[0]-shiftCorrectedTimes[1]);
   ShiftTOF=0.5*(shiftCorrectedTimes[0]+shiftCorrectedTimes[1]) -shiftCorrectedTimes[2];
 
-  walkCor();
+  if (walkCorrections.size()!=0)
+    walkCor();
 
   // TOFW1=0.5*(walkCorrectedTimes[0]+walkCorrectedTimes[1]) -walkCorrectedTimes[2];
 
+  TOF_sub = TMath::Gaus(ShiftTOF,-1.58697e+01,1.22056e-01);
 
   PulseShape = longGates[2]/shortGates[2];
 

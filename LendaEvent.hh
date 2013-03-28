@@ -18,6 +18,7 @@ public:
   void Finalize();
   //Convenient quantities
   Double_t TOF;
+  Double_t TOF_sub;
   Double_t ShiftDt;
   Double_t ShiftTOF;
   Double_t Dt;

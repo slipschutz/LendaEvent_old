@@ -30,7 +30,7 @@ $(LIBRARY) : $(DICTOBJ) $(OBJECTS)
 
 .cc.o:
 	@echo "Compiling" $< "..."
-	@$(CXX) $(CFLAGS) $< -o $@ 
+	@$(CXX) $(CFLAGS) -fPIC $< -o $@ 
 
 test:
 	@echo $(LIBRARY) : $(DICTOBJ) $(OBJECTS)    
