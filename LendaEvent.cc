@@ -36,6 +36,7 @@ void LendaEvent::setWalkCorrections(vector <Double_t> in,Int_t channel){
   
   walkCorrections[channel]=in;
 
+
   numOfWalkCorrections++;
 }
 
@@ -165,10 +166,6 @@ void LendaEvent::walkCor(){
   for (int i=0;i<numOfWalkCorrections;i++)
     total[i]=0;
 
-  //copy over the shift corrected times
-  for (int i=0;i<(int)shiftCorrectedTimes.size();i++){
-    walkCorrectedTimes.push_back(shiftCorrectedTimes[i]);
-  }
 
   //cout<<"numOfWalkCorrections: "<<numOfWalkCorrections<<endl;
   //cout<<"size "<<walkCorrections[channels[0]].size()<<endl;
@@ -176,17 +173,13 @@ void LendaEvent::walkCor(){
   // int t;cin>>t;
   
   for (int j=0;j<numOfWalkCorrections;j++){
-    for (int i=0;i<(int)walkCorrections[channels[j]].size();i++){
-      
-      // cout<<"J is "<<j<<endl;
-      // cout<<"channels[j] "<<channels[j]<<endl;
-      //      cout<<" size is "<<walkCorrections[channels[j]].size()<<endl;
+    if (channels[j]<walkCorrections.size()){
+      for (int i=0;i<(int)walkCorrections[channels[j]].size();i++){
+	
+	//	if (energiesCor[j]<600)
+	  total[j]=total[j]+walkCorrections[channels[j]][i]*TMath::Power(energiesCor[j],i+1);
 
-      // cout<<"total[j] before "<<total[j]<<endl;
-      // int t;cin>>t;
-      if (energiesCor[j]<180)
-	total[j]=total[j]+walkCorrections[channels[j]][i]*TMath::Power(energiesCor[j],i+1);
-      //      cout<<"total[j] after "<<total[j]<<endl;
+      }
     }
   }
 
