@@ -40,8 +40,21 @@ void LendaEvent::setWalkCorrections(vector <Double_t> in,Int_t channel){
   fnumOfWalkCorrections++;
 }
 
-void LendaEvent::setGainCorrections(vector <Double_t> in){
-  fgainCorrections=in;
+void LendaEvent::setGainCorrections(vector <Double_t> in ){
+  for (int i=0;i<(int)in.size();i++)
+    setGainCorrections(in[i],i);
+}
+
+void LendaEvent::setGainCorrections(Double_t in,Int_t channel){
+
+  if (channel >= (Int_t)fgainCorrections.size()){
+    int diff = channel - fgainCorrections.size();
+    fgainCorrections.resize(fgainCorrections.size()+diff+1,1.0);
+  }
+  fgainCorrections[channel]=in;
+
+
+  fnumOfGainCorrections++;
 }
 
 
@@ -143,19 +156,23 @@ void LendaEvent::gainCor(){
 
   //Applying gain correction to each of the channels for Lenda bars
   
-
   for (int i=0;i<(int)energies.size();i++){
+    energiesCor[i]=energies[i]*fgainCorrections[channels[i]];
+
+  }
+  /*
+
     if (channels[i] == 0)
       energiesCor[i]= energies[i]*fgainCorrections[0];
     else if (channels[i] == 1)
-      energiesCor[i]= energies[i]*fgainCorrections[1];
+      enez rgiesCor[i]= energies[i]*fgainCorrections[1];
     else if (channels[i] == 2)
       energiesCor[i]= energies[i]*fgainCorrections[2];
     else if (channels[i] == 3)
       energiesCor[i]= energies[i]*fgainCorrections[3];
     else if (channels[i]==8)
       energiesCor[i]=energies[i]*fgainCorrections[4];//For the liqscints
-  }
+      }*/
 }
 
 void LendaEvent::walkCor(){
@@ -216,16 +233,29 @@ void LendaEvent::Finalize(){
 
 
 void LendaEvent::dumpWalkCorrections(){
+  cout<<"\n***Dump walk corrections***"<<endl;
 
   for (int j=0;j<(int)fwalkCorrections.size();++j){
     int max_i = fwalkCorrections[j].size();
-    cout<<"walkCorrection["<<j<<"]"<<endl;
+    cout<<"walkCorrection for channel "<<j<<endl;
     for (int i=0;i<max_i;++i){
-      cout<<fwalkCorrections[j][i]<<endl;
-            
+      cout<<"   c"<<i+1<<" "<<fwalkCorrections[j][i]<<endl;
+      //i+1 because the coefficents don't include the constant term
     }
   }
   
 
 }
 
+void LendaEvent::dumpGainCorrections(){
+  cout<<"\n***Dump gain Corrections***"<<endl;
+  for (int i=0;i<(int)fgainCorrections.size();++i){
+    cout<<"gain correction for channel "<<i<<" "<<fgainCorrections[i]<<endl;
+  }
+}
+
+void LendaEvent::dumpAllCorrections(){
+  dumpGainCorrections();
+  dumpWalkCorrections();
+  
+}

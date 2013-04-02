@@ -58,7 +58,10 @@ public:
 
   //Corrections setting methods
   inline void setShiftCorrections(Double_t c1,Double_t c2){sdt1=c1;sdt2=c2;}
-  void setGainCorrections(vector <Double_t> in);
+  void setGainCorrections(Double_t in,Int_t channel);//sets the gain correction for a channel
+  void setGainCorrections(vector <Double_t> );//wrapper to the above assumes the vector has channel 0 at 
+                                              //index 0 and channel 1 at index 1 ...
+
 
   void setWalkCorrections(vector <Double_t> in); //This sets input walkcorrection as the first 
                                                  //correction in the set walkCorrections[0][i] i goes 
@@ -69,6 +72,8 @@ public:
 
 
   void dumpWalkCorrections();
+  void dumpGainCorrections();
+  void dumpAllCorrections();
 
   void pushLiqCorrections(Double_t,Double_t);
 
@@ -84,10 +89,10 @@ private:
   vector < vector <Double_t> > fwalkCorrections; // set of walkCorrections
 
   int fnumOfWalkCorrections;
-
+  int fnumOfGainCorrections;
 
 public:
-  ClassDef(LendaEvent, 5);
+  ClassDef(LendaEvent, 6);
 };
 
 #endif
