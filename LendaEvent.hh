@@ -4,7 +4,7 @@
 #include "TObject.h"
 #include "TFile.h"
 #include <vector>
-
+#include <map>
 
 
 
@@ -21,6 +21,7 @@ public:
 
   //Convenient quantities
   Double_t TOF;
+  
   Double_t ShiftDt;
   Double_t ShiftTOF;
   Double_t Dt;
@@ -28,7 +29,7 @@ public:
   Double_t GOE;
   Double_t CorGOE;
   vector <Double_t> TOFW; // the Walk corrections to TOFW
-
+  vector <Double_t> TOFP;
 
   //Main information holders
   vector <Double_t> energiesCor;
@@ -70,17 +71,24 @@ public:
   void setWalkCorrections(vector <Double_t> in,Int_t channel); // sets the correction and puts it in the 
                                                                //walkCorrections[channel][i]
 
+  void setPositionCorrections(vector <Double_t>,Int_t channel );
+
 
   void dumpWalkCorrections();
   void dumpGainCorrections();
   void dumpAllCorrections();
+  void dumpPositionCorrections(); 
 
   void pushLiqCorrections(Double_t,Double_t);
+
+  void Fatal();
+
 
 private:
   void shiftCor();
   void gainCor();
   void walkCor();  
+  void posCor();
 
   //Corecction 
   Double_t sdt1,sdt2;
@@ -88,11 +96,17 @@ private:
   vector <Double_t> fgainCorrections; //the gain corrections 
   vector < vector <Double_t> > fwalkCorrections; // set of walkCorrections
 
+  map <string,vector<Double_t> > fPositionCorrections;//map for the position corrections 
+
   int fnumOfWalkCorrections;
   int fnumOfGainCorrections;
+  int fnumOfPositionCorrections;
+
+  string fPosForm;
+
 
 public:
-  ClassDef(LendaEvent, 6);
+  ClassDef(LendaEvent, 7);
 };
 
 #endif

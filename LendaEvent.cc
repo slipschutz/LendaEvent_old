@@ -3,7 +3,7 @@
 #include "LendaEvent.hh"
 #include <iostream>
 #include "TMath.h"
-
+#include <sstream>
 
 using namespace std;
 
@@ -11,11 +11,15 @@ using namespace std;
 #define BAD_NUM -1008
 LendaEvent::LendaEvent()
 {
+ 
+  fPosForm="chan";
   sdt1=0;
   sdt2=0;
   fgainCorrections.clear();
   fwalkCorrections.clear();
   fnumOfWalkCorrections=0;
+  fnumOfGainCorrections=0;
+  fnumOfPositionCorrections=0;
   Clear();
   
 
@@ -208,6 +212,7 @@ void LendaEvent::Finalize(){
 
   energiesCor.resize(energies.size());
   TOFW.resize(fnumOfWalkCorrections);
+  TOFP.resize(fnumOfPositionCorrections);
   shiftCor();//make the shiftCorrectedTimes
  
   if (fgainCorrections.size()!=0)//only apply gain correctins if 
@@ -228,9 +233,111 @@ void LendaEvent::Finalize(){
 
   GOE = (energies[0]-energies[1])/(energies[0]+energies[1]);
   CorGOE = (energiesCor[0]-energiesCor[1])/(energiesCor[0]+energiesCor[1]);
-  
+  posCor();  
 }
 
+void LendaEvent::setPositionCorrections(vector <Double_t> coef,Int_t channel ){
+
+  stringstream key;
+  key<<fPosForm<<"_"<<channel;
+
+  if (fPositionCorrections.find(key.str()) == fPositionCorrections.end()){
+    fPositionCorrections[key.str()]=coef;
+    fnumOfPositionCorrections++;
+  }else {
+    cout<<"***Warning correction with key "<<key.str()<<" has already exists***"<<endl;
+    cout<<"***Choose different key***"<<endl;
+  }
+}
+
+void LendaEvent::posCor(){
+  //Apply the position correctioins
+
+  
+
+  Double_t total[fnumOfPositionCorrections];
+
+  for (int i=0;i<fnumOfPositionCorrections;i++)
+    total[i]=0;
+
+  stringstream key;
+  vector <Double_t> theCoef;
+  for (int j=0;j<fnumOfPositionCorrections;j++){
+    key.str("");
+    key<<fPosForm<<"_"<<channels[j];
+    if (fPositionCorrections.find(key.str()) != fPositionCorrections.end()){
+      theCoef =fPositionCorrections[key.str()];
+      for (int i=0;i<theCoef.size();++i){
+	total[j]=total[j]+ theCoef[i]*TMath::Power(CorGOE,i+1);
+
+
+      }
+    }
+  }
+
+  Double_t runningTotal=0;
+  for (int j=0;j<fnumOfPositionCorrections;j++){
+    runningTotal=runningTotal+total[j];
+    TOFP[j]=ShiftTOF-runningTotal;    
+  }
+
+  /*
+    if (channels[j]<fwalkCorrections.size()){
+      for (int i=0;i<(int)fwalkCorrections[channels[j]].size();i++){
+
+        //      if (energiesCor[j]<600)
+	total[j]=total[j]+fwalkCorrections[channels[j]][i]*TMath::Power(energiesCor[j],i+1);
+
+      }
+    }
+  }
+
+  Double_t runningTotal=0;
+  for (int j=0;j<fnumOfWalkCorrections;j++){
+    runningTotal = runningTotal +total[j];
+    //     cout<<"This is runningTotal "<<runningTotal<<" this is J "<<j<<endl;
+    // int t ;cin>>t;
+    TOFW[j]=ShiftTOF-runningTotal;
+  }
+
+
+  */
+
+
+}
+
+/*
+void LendaEvent::checkKey(string key){
+
+
+ istringstream iss( key );
+ vector<string> parts;
+ string result;
+  while (std::getline( iss, result , '_') )
+    {
+      parts.push_back(result);
+    }   
+
+  if (parts.size() != 2){
+    cout<<"***Warning incorect position Correction key***"<<endl;
+    cout<<"***Must be something_degreeOfCoef***"<<endl;
+  }
+
+  if (parts[0]!=fPosForm && fnumOfPositionCorrections==0){//if the given key is not like the expexted form
+    fnumOfPositionCorrections++;                          //but it is the first key make that the form
+    fPosForm=parts[0];
+  }else if (parts[0]!=fPosForm && fnumOfPositionCorrections!=0){
+    cout<<"***Warning given key does no match the expected form for keys***"<<endl;
+    cout<<"***Expected form is "<<fPosForm<<"_degreeOfCoef***"<<endl;
+    cout<<"***You gave "<<key<<"***"<<endl;
+  } else {
+    //nothing wrong
+    fnumOfPositionCorrections++;
+  }
+
+
+}
+*/
 
 void LendaEvent::dumpWalkCorrections(){
   cout<<"\n***Dump walk corrections***"<<endl;
@@ -257,5 +364,22 @@ void LendaEvent::dumpGainCorrections(){
 void LendaEvent::dumpAllCorrections(){
   dumpGainCorrections();
   dumpWalkCorrections();
-  
+  dumpPositionCorrections();
 }
+
+
+void LendaEvent:: dumpPositionCorrections(){
+  
+for( map<string,vector<double> >::iterator ii=fPositionCorrections.begin(); ii!=fPositionCorrections.end(); ++ii)
+    {
+      for (int i=0;i<(int)((*ii).second).size();++i)
+	cout << (*ii).first<<" "<<i << ": " << (*ii).second[i] << endl;
+    }
+
+
+}
+
+void LendaEvent::Fatal(){
+  cout<<"This Method should not exist.  Don't call it"<<endl;
+}
+
