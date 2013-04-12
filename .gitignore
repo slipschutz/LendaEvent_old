@@ -1,2 +1,6 @@
 *Dictionary*
 *.so
+*.o
+*#
+*.root
+#*

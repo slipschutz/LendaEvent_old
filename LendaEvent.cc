@@ -11,7 +11,7 @@ using namespace std;
 #define BAD_NUM -1008
 LendaEvent::LendaEvent()
 {
- 
+  
   fPosForm="chan";
   sdt1=0;
   sdt2=0;
@@ -20,6 +20,7 @@ LendaEvent::LendaEvent()
   fnumOfWalkCorrections=0;
   fnumOfGainCorrections=0;
   fnumOfPositionCorrections=0;
+  currentCorrectionRefference=&ShiftTOF;
   Clear();
   
 

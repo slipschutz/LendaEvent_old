@@ -102,8 +102,10 @@ private:
   int fnumOfGainCorrections;
   int fnumOfPositionCorrections;
 
-  string fPosForm;
-
+  string fPosForm;//defualt form of the string stored in the posCor map
+  
+  Double_t *currentCorrectionReference;
+  
 
 public:
   ClassDef(LendaEvent, 7);
