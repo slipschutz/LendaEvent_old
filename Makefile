@@ -8,7 +8,8 @@ ROOTCINT=rootcint
 
 NAME=LendaEvent
 temp= $(addprefix lib,$(NAME))
-LIBRARY= $(addsuffix .so,$(temp))
+temp2=$(addsuffix $(LDFLAGS),$(temp))
+LIBRARY= $(addsuffix .so,$(temp2))
 DICTNAME=$(addsuffix Dictionary,$(NAME))
 DICTOBJ=$(addsuffix .o,$(DICTNAME))
 OBJECTS=$(addsuffix .o, $(NAME))
@@ -19,7 +20,7 @@ all: $(LIBRARY)
 
 $(LIBRARY) : $(DICTOBJ) $(OBJECTS)
 	@echo "Building Library"
-	@$(CXX) `root-config --cflags` -fPIC -shared -Wl -o $@ $^;
+	@$(CXX) `root-config --cflags` -fPIC -shared -o $@ $^;
 	@echo "Build succeed"
 
 %Dictionary.o : %.hh %LinkDef.h
@@ -36,9 +37,10 @@ test:
 	@echo $(LIBRARY) : $(DICTOBJ) $(OBJECTS)    
 
 clean:
-	-rm $(DICTOBJ) $(OBJECTS)
-	-rm *Dictionary.h
-	-rm *Dictionary.cc
+	-rm -f $(DICTOBJ) $(OBJECTS)
+	-rm -f *Dictionary.h
+	-rm -f *Dictionary.cc
+	-rm -f $(LIBRARY)
 sclean:
 	-rm *~
 	make clean

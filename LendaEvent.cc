@@ -13,6 +13,7 @@ LendaEvent::LendaEvent()
 {
  
   fPosForm="chan";
+  CTrace=0;
   sdt1=0;
   sdt2=0;
   fgainCorrections.clear();
@@ -63,17 +64,20 @@ void LendaEvent::setGainCorrections(Double_t in,Int_t channel){
 
 
 void LendaEvent::Clear(){
-
+  ////REMEBER TO CLEAR THINGS THAT were thing.push_Back!!!!
   TOF=BAD_NUM;
+  Dt=BAD_NUM;
 
   ShiftDt=BAD_NUM;
   ShiftTOF=BAD_NUM;
-  Dt=BAD_NUM;
+
   GOE=BAD_NUM;
   CorGOE=BAD_NUM;
   PulseShape=BAD_NUM;
 
   TOFW.clear();
+  TOFP.clear();
+
   times.clear();
   energies.clear();
   energiesCor.clear();
@@ -83,10 +87,10 @@ void LendaEvent::Clear(){
   shortGates.clear();
   longGates.clear();
 
-  ////REMEBER TO CLEAR THINGS THAT were thing.push_Back!!!!
-  shiftCorrectedTimes.clear();
-  liqCorrectedTimes.clear();
 
+  shiftCorrectedTimes.clear();
+
+  CTrace =0;
 
 }
 
@@ -106,25 +110,6 @@ void LendaEvent::pushTrace(vector <UShort_t> in){
   traces.push_back(in);
 }
 
-
-
-void LendaEvent::pushLiqCorrections(Double_t c1,Double_t c2){ //not in use right now?
-  //Liq1 = channel 8
-  //Time_Diff  timeDiff = 0.5*(events[0]->time + events[1]->time) - events[2]->time;
- 
-  if (shiftCorrectedTimes.size() == 0 ){
-    cout<<"***Warning preform shift correction first***"<<endl;
-  }
-  liqCorrectedTimes.push_back(shiftCorrectedTimes[0]);//0 is unchanged
-  liqCorrectedTimes.push_back(shiftCorrectedTimes[1]);//1 is unchanged
-  
-  if (channels[0]==0 && channels[1]==1){
-    liqCorrectedTimes.push_back(shiftCorrectedTimes[2]+c1);
-  } else if (channels[0] ==2 && channels[1]==3){
-    liqCorrectedTimes.push_back(shiftCorrectedTimes[2]+c2);
-  }
-  
-}
 
 
 
@@ -197,12 +182,13 @@ void LendaEvent::walkCor(){
     }
   }
 
+
   Double_t runningTotal=0;
   for (int j=0;j<fnumOfWalkCorrections;j++){
      runningTotal = runningTotal +total[j];
      //     cout<<"This is runningTotal "<<runningTotal<<" this is J "<<j<<endl;
      // int t ;cin>>t;
-     TOFW[j]=ShiftTOF-runningTotal;
+     TOFW[j]=fTimeAfterPosCor-runningTotal;
   }
     
 }
@@ -224,8 +210,7 @@ void LendaEvent::Finalize(){
   ShiftDt=(shiftCorrectedTimes[0]-shiftCorrectedTimes[1]);
   ShiftTOF=0.5*(shiftCorrectedTimes[0]+shiftCorrectedTimes[1]) -shiftCorrectedTimes[2];
 
-  if (fwalkCorrections.size()!=0)
-    walkCor();
+
 
   PulseShape = longGates[2]/shortGates[2];
 
@@ -234,6 +219,10 @@ void LendaEvent::Finalize(){
   GOE = (energies[0]-energies[1])/(energies[0]+energies[1]);
   CorGOE = (energiesCor[0]-energiesCor[1])/(energiesCor[0]+energiesCor[1]);
   posCor();  
+
+  if (fwalkCorrections.size()!=0)
+    walkCor();
+
 }
 
 void LendaEvent::setPositionCorrections(vector <Double_t> coef,Int_t channel ){
@@ -275,11 +264,19 @@ void LendaEvent::posCor(){
     }
   }
 
+
   Double_t runningTotal=0;
   for (int j=0;j<fnumOfPositionCorrections;j++){
     runningTotal=runningTotal+total[j];
     TOFP[j]=ShiftTOF-runningTotal;    
+
   }
+
+
+  if (TOFP.size()!=0)
+    fTimeAfterPosCor=TOFP[TOFP.size()-1];
+  else
+    fTimeAfterPosCor=ShiftTOF;
 
   /*
     if (channels[j]<fwalkCorrections.size()){
@@ -339,7 +336,7 @@ void LendaEvent::checkKey(string key){
 }
 */
 
-void LendaEvent::dumpWalkCorrections(){
+void LendaEvent::DumpWalkCorrections(){
   cout<<"\n***Dump walk corrections***"<<endl;
 
   for (int j=0;j<(int)fwalkCorrections.size();++j){
@@ -354,21 +351,21 @@ void LendaEvent::dumpWalkCorrections(){
 
 }
 
-void LendaEvent::dumpGainCorrections(){
+void LendaEvent::DumpGainCorrections(){
   cout<<"\n***Dump gain Corrections***"<<endl;
   for (int i=0;i<(int)fgainCorrections.size();++i){
     cout<<"gain correction for channel "<<i<<" "<<fgainCorrections[i]<<endl;
   }
 }
 
-void LendaEvent::dumpAllCorrections(){
-  dumpGainCorrections();
-  dumpWalkCorrections();
-  dumpPositionCorrections();
+void LendaEvent::DumpAllCorrections(){
+  DumpGainCorrections();
+  DumpWalkCorrections();
+  DumpPositionCorrections();
 }
 
 
-void LendaEvent:: dumpPositionCorrections(){
+void LendaEvent:: DumpPositionCorrections(){
   
 for( map<string,vector<double> >::iterator ii=fPositionCorrections.begin(); ii!=fPositionCorrections.end(); ++ii)
     {
@@ -383,3 +380,16 @@ void LendaEvent::Fatal(){
   cout<<"This Method should not exist.  Don't call it"<<endl;
 }
 
+void LendaEvent::MakeC(int spot){
+
+  //  CTrace = calloc(sizeof(UShort_t)*traces[0].size());
+
+  CTrace = new UShort_t[traces[spot].size()];
+
+
+
+  for (int i=0;i<traces[spot].size();++i){
+    CTrace[i]=traces[spot][i];
+  }
+
+}
