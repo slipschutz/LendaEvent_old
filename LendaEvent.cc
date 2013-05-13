@@ -13,7 +13,6 @@ LendaEvent::LendaEvent()
 {
  
   fPosForm="chan";
-  CTrace=0;
   sdt1=0;
   sdt2=0;
   fgainCorrections.clear();
@@ -21,8 +20,10 @@ LendaEvent::LendaEvent()
   fnumOfWalkCorrections=0;
   fnumOfGainCorrections=0;
   fnumOfPositionCorrections=0;
+  CTrace=0;
   Clear();
-  
+
+ 
 
 }
 
@@ -90,7 +91,9 @@ void LendaEvent::Clear(){
 
   shiftCorrectedTimes.clear();
 
-  CTrace =0;
+
+
+  NumOfChannelsInEvent=0;
 
 }
 
@@ -211,7 +214,7 @@ void LendaEvent::Finalize(){
   ShiftTOF=0.5*(shiftCorrectedTimes[0]+shiftCorrectedTimes[1]) -shiftCorrectedTimes[2];
 
 
-
+  NumOfChannelsInEvent = times.size();//the number of channels pushed to event
   PulseShape = longGates[2]/shortGates[2];
 
   Dt = times[0]-times[1];
@@ -384,9 +387,15 @@ void LendaEvent::MakeC(int spot){
 
   //  CTrace = calloc(sizeof(UShort_t)*traces[0].size());
 
+  if (traces.size() == 0 ){
+    cout<<"There are no traces to copy"<<endl;
+    return;
+  }
+
+  if (CTrace != 0 )
+    delete CTrace;
+
   CTrace = new UShort_t[traces[spot].size()];
-
-
 
   for (int i=0;i<traces[spot].size();++i){
     CTrace[i]=traces[spot][i];

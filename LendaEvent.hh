@@ -44,7 +44,7 @@ public:
 
 
   //C Traces thing
-  //root secissions like c arrays more then vectors of vectors
+  //root like c arrays more then vectors of vectors
   void MakeC(int spot=0);  //copy trace data for the spot-th trace into C-array
   UShort_t *CTrace;  //the c-array to store the trace in
 
@@ -58,6 +58,7 @@ public:
   void pushChannel(Double_t);
   void pushTrace (vector <UShort_t>);
 
+  Int_t NumOfChannelsInEvent; //The Number of channels associated with this event
 
   //Corrections setting methods
   inline void setShiftCorrections(Double_t c1,Double_t c2){sdt1=c1;sdt2=c2;}//set shift Cor
@@ -103,16 +104,16 @@ private:
 
   map <string,vector<Double_t> > fPositionCorrections;//map for the position corrections 
 
-  int fnumOfWalkCorrections;
-  int fnumOfGainCorrections;
-  int fnumOfPositionCorrections;
+  int fnumOfWalkCorrections; // number of walk corrections
+  int fnumOfGainCorrections;// number of Gain corrections
+  int fnumOfPositionCorrections;// number of position corrections
 
-  string fPosForm;
+  string fPosForm; 
   
-  double fTimeAfterPosCor;
+  double fTimeAfterPosCor; //the time after the pos cor which the walk cor is applied to
 
 public:
-  ClassDef(LendaEvent, 9);
+  ClassDef(LendaEvent, 10);
 };
 
 #endif
