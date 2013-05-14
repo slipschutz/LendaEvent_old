@@ -20,11 +20,13 @@ LendaEvent::LendaEvent()
   fnumOfWalkCorrections=0;
   fnumOfGainCorrections=0;
   fnumOfPositionCorrections=0;
+  
   CTrace=0;
+  CFilter=0;
+  CCFD=0;
+
   Clear();
-
- 
-
+  
 }
 
 void LendaEvent::setWalkCorrections(vector <Double_t> in){
@@ -83,7 +85,10 @@ void LendaEvent::Clear(){
   energies.clear();
   energiesCor.clear();
   channels.clear();
-  traces.clear();
+
+  Traces.clear();
+  Filters.clear();
+  CFDs.clear();
   
   shortGates.clear();
   longGates.clear();
@@ -110,7 +115,13 @@ void LendaEvent::pushChannel(Double_t c){
 }
 
 void LendaEvent::pushTrace(vector <UShort_t> in){
-  traces.push_back(in);
+  Traces.push_back(in);
+}
+void LendaEvent::pushFilter(vector <Double_t> in){
+  Filters.push_back(in);
+}
+void LendaEvent::pushCFD(vector <Double_t> in){
+  CFDs.push_back(in);
 }
 
 
@@ -382,23 +393,76 @@ for( map<string,vector<double> >::iterator ii=fPositionCorrections.begin(); ii!=
 void LendaEvent::Fatal(){
   cout<<"This Method should not exist.  Don't call it"<<endl;
 }
-
+/*
 void LendaEvent::MakeC(int spot){
 
   //  CTrace = calloc(sizeof(UShort_t)*traces[0].size());
+
+  fSize = traces[spot].size();
 
   if (traces.size() == 0 ){
     cout<<"There are no traces to copy"<<endl;
     return;
   }
 
-  if (CTrace != 0 )
-    delete CTrace;
+   if (CTrace != 0 )
+    delete [] CTrace;
 
   CTrace = new UShort_t[traces[spot].size()];
-
+  
   for (int i=0;i<traces[spot].size();++i){
     CTrace[i]=traces[spot][i];
+  }
+
+}
+*/
+
+
+
+void LendaEvent::MakeC(int spot){
+  
+  cout<<"this is CTrace "<<CTrace<<endl;
+  
+  if (CTrace != 0){
+    cout<<"Free CTrace"<<endl;
+    free(CTrace);
+    CTrace=0;
+    
+  }
+  if (CFilter !=0){
+    cout<<"Free CFilter"<<endl;
+    free(CFilter);
+    CFilter=0;
+  }
+
+  if (CCFD !=0 ){
+    cout<<"Free CCFD"<<endl;
+    free(CCFD);
+    CCFD=0;
+  }
+
+  if (Traces.size()!=0 &&Traces[spot].size() != 0 ){
+    cout<<"Allocate CTrace"<<endl;
+    CTrace = (UShort_t*)calloc(sizeof(UShort_t),Traces[spot].size());
+  }
+
+  if (Filters.size() !=0 && Filters[spot].size() != 0){
+    cout<<"Allocate CFilter"<<endl;
+    CFilter = (Double_t*)calloc(sizeof(Double_t),Traces[spot].size());
+  }
+
+  if (CFDs.size() !=0 && CFDs[spot].size() != 0 ){
+    cout<<"Allocate CCFD"<<endl;
+    CCFD = (Double_t*)calloc(sizeof(Double_t),Traces[spot].size());
+  }
+  
+  for (int i=0;i<Traces[spot].size();i++){
+    if (CTrace != 0)
+      CTrace[i]=Traces[spot][i];
+    if (CFilter !=0 )
+      CFilter[i]=Filters[spot][i];
+    if ( CCFD !=0 )
+      CCFD[i]=CFDs[spot][i];
   }
 
 }

@@ -34,8 +34,11 @@ public:
   vector <Double_t> times; //the times
   vector <Double_t> energies; // the raw energies
   vector <Double_t> channels; // the channels
-  vector < vector <UShort_t> > traces; // a vector of vectors holding the traces if present
-
+  vector < vector <UShort_t> > Traces; // a vector of vectors holding the traces if present
+  vector < vector <Double_t> > Filters; //a vector of vectors for the filters if presetn
+  vector < vector <Double_t> > CFDs;  // a vector of vectors for the CFDs if present
+  
+  
 
   vector <Double_t> shiftCorrectedTimes; //The shift corrected times
   vector <Double_t> shortGates;  //short gate energies
@@ -43,11 +46,15 @@ public:
 
 
 
-  //C Traces thing
+  //C Trace thing
   //root like c arrays more then vectors of vectors
-  void MakeC(int spot=0);  //copy trace data for the spot-th trace into C-array
-  UShort_t *CTrace;  //the c-array to store the trace in
-
+  void MakeC(int spot=0);  //copy trace,FF,CFD data for the spot-th trace into C-arrays
+  //the c-array to store the trace in
+  Int_t fSize;//!
+  UShort_t *CTrace;//[fSize] 
+  Double_t* CFilter;//[fSize];
+  Double_t* CCFD;//[fSize];
+ 
 
 
   //pushing methods expects the series of times and energies to be ordered by channel
@@ -57,7 +64,8 @@ public:
   void pushTime(Double_t);
   void pushChannel(Double_t);
   void pushTrace (vector <UShort_t>);
-
+  void pushFilter (vector <Double_t>);
+  void pushCFD (vector <Double_t>);
   Int_t NumOfChannelsInEvent; //The Number of channels associated with this event
 
   //Corrections setting methods
