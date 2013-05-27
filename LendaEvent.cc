@@ -70,6 +70,8 @@ void LendaEvent::Clear(){
   ////REMEBER TO CLEAR THINGS THAT were thing.push_Back!!!!
   TOF=BAD_NUM;
   Dt=BAD_NUM;
+  
+  NumBadPoints=0;
 
   ShiftDt=BAD_NUM;
   ShiftTOF=BAD_NUM;
@@ -84,12 +86,19 @@ void LendaEvent::Clear(){
   times.clear();
   energies.clear();
   energiesCor.clear();
+  internEnergies.clear();
   channels.clear();
+  softwareCFDs.clear();
+  internalCFDs.clear();
+  softTimes.clear();
+  cubicTimes.clear();
 
   Traces.clear();
   Filters.clear();
   CFDs.clear();
-  
+
+  entryNums.clear();
+
   shortGates.clear();
   longGates.clear();
 
@@ -124,7 +133,22 @@ void LendaEvent::pushCFD(vector <Double_t> in){
   CFDs.push_back(in);
 }
 
+void LendaEvent::pushInternalCFD(Double_t t){
+  internalCFDs.push_back(t);
+}
+void LendaEvent::pushSoftwareCFD(Double_t t){
+  softwareCFDs.push_back(t);
+}
+void LendaEvent::pushSoftTime(Double_t t){
+  softTimes.push_back(t);
+}
 
+void LendaEvent::pushEntryNum(Long64_t t){
+  entryNums.push_back(t);
+}
+void LendaEvent::pushCubicTime(Double_t t){
+  cubicTimes.push_back(t);
+}
 
 
 void LendaEvent::pushLongGate(Double_t lg){
@@ -132,6 +156,9 @@ void LendaEvent::pushLongGate(Double_t lg){
 }
 void LendaEvent::pushShortGate(Double_t sg){
   shortGates.push_back(sg);
+}
+void LendaEvent::pushInternEnergy(Double_t t){
+  internEnergies.push_back(t);
 }
 
 void LendaEvent::shiftCor(){
@@ -218,6 +245,22 @@ void LendaEvent::Finalize(){
   if (fgainCorrections.size()!=0)//only apply gain correctins if 
     gainCor();                   //they have be provided
 
+
+  if (Traces.size()!=0){
+    
+    for (int j=0;j<Traces.size();j++){
+      double avg =0;
+      if (Traces[j].size()>20){
+	for (int a=0;a<20;a++)
+	  avg = Traces[j][a] +avg;
+	avg=avg/20.0;
+	for (int i=0;i<Traces[j].size();i++){
+	  if (Traces[j][i]< 0.9*avg)
+	    NumBadPoints++;
+	}
+      }
+    }
+  }
 
 
   TOF = 0.5*(times[0]+times[1])-times[2];
@@ -317,38 +360,6 @@ void LendaEvent::posCor(){
 
 }
 
-/*
-void LendaEvent::checkKey(string key){
-
-
- istringstream iss( key );
- vector<string> parts;
- string result;
-  while (std::getline( iss, result , '_') )
-    {
-      parts.push_back(result);
-    }   
-
-  if (parts.size() != 2){
-    cout<<"***Warning incorect position Correction key***"<<endl;
-    cout<<"***Must be something_degreeOfCoef***"<<endl;
-  }
-
-  if (parts[0]!=fPosForm && fnumOfPositionCorrections==0){//if the given key is not like the expexted form
-    fnumOfPositionCorrections++;                          //but it is the first key make that the form
-    fPosForm=parts[0];
-  }else if (parts[0]!=fPosForm && fnumOfPositionCorrections!=0){
-    cout<<"***Warning given key does no match the expected form for keys***"<<endl;
-    cout<<"***Expected form is "<<fPosForm<<"_degreeOfCoef***"<<endl;
-    cout<<"***You gave "<<key<<"***"<<endl;
-  } else {
-    //nothing wrong
-    fnumOfPositionCorrections++;
-  }
-
-
-}
-*/
 
 void LendaEvent::DumpWalkCorrections(){
   cout<<"\n***Dump walk corrections***"<<endl;
@@ -393,30 +404,6 @@ for( map<string,vector<double> >::iterator ii=fPositionCorrections.begin(); ii!=
 void LendaEvent::Fatal(){
   cout<<"This Method should not exist.  Don't call it"<<endl;
 }
-/*
-void LendaEvent::MakeC(int spot){
-
-  //  CTrace = calloc(sizeof(UShort_t)*traces[0].size());
-
-  fSize = traces[spot].size();
-
-  if (traces.size() == 0 ){
-    cout<<"There are no traces to copy"<<endl;
-    return;
-  }
-
-   if (CTrace != 0 )
-    delete [] CTrace;
-
-  CTrace = new UShort_t[traces[spot].size()];
-  
-  for (int i=0;i<traces[spot].size();++i){
-    CTrace[i]=traces[spot][i];
-  }
-
-}
-*/
-
 
 
 void LendaEvent::MakeC(int spot){
@@ -445,12 +432,12 @@ void LendaEvent::MakeC(int spot){
     cout<<"Allocate CTrace"<<endl;
     CTrace = (UShort_t*)calloc(sizeof(UShort_t),Traces[spot].size());
   }
-
+  
   if (Filters.size() !=0 && Filters[spot].size() != 0){
     cout<<"Allocate CFilter"<<endl;
     CFilter = (Double_t*)calloc(sizeof(Double_t),Traces[spot].size());
   }
-
+  
   if (CFDs.size() !=0 && CFDs[spot].size() != 0 ){
     cout<<"Allocate CCFD"<<endl;
     CCFD = (Double_t*)calloc(sizeof(Double_t),Traces[spot].size());
@@ -464,5 +451,5 @@ void LendaEvent::MakeC(int spot){
     if ( CCFD !=0 )
       CCFD[i]=CFDs[spot][i];
   }
-
+  
 }

@@ -23,6 +23,8 @@ public:
   Double_t ShiftTOF; //TOF after shift correction
   Double_t ShiftDt;  //Dt after shift correction
 
+  Int_t NumBadPoints;
+
   Double_t PulseShape; //long gate over short gate 
   Double_t GOE;   //Center of Gravity (E1-E2)/(E1+E2) 
   Double_t CorGOE;//Center of Gravity after gain matching
@@ -32,8 +34,15 @@ public:
   //Main information holders
   vector <Double_t> energiesCor; //the corrected energies 
   vector <Double_t> times; //the times
+  vector <Double_t> softTimes;
+  vector <Double_t> cubicTimes;
   vector <Double_t> energies; // the raw energies
+  vector <Double_t> internEnergies;
   vector <Double_t> channels; // the channels
+  vector <Double_t> softwareCFDs;
+  vector <Double_t> internalCFDs;
+  vector <Long64_t> entryNums;
+
   vector < vector <UShort_t> > Traces; // a vector of vectors holding the traces if present
   vector < vector <Double_t> > Filters; //a vector of vectors for the filters if presetn
   vector < vector <Double_t> > CFDs;  // a vector of vectors for the CFDs if present
@@ -61,11 +70,18 @@ public:
   void pushLongGate(Double_t);
   void pushShortGate(Double_t);
   void pushEnergy(Double_t);
+  void pushInternEnergy(Double_t);
   void pushTime(Double_t);
   void pushChannel(Double_t);
   void pushTrace (vector <UShort_t>);
   void pushFilter (vector <Double_t>);
   void pushCFD (vector <Double_t>);
+  void pushInternalCFD(Double_t);
+  void pushSoftwareCFD(Double_t);
+  void pushSoftTime(Double_t);
+  void pushEntryNum(Long64_t);
+  void pushCubicTime(Double_t);
+
   Int_t NumOfChannelsInEvent; //The Number of channels associated with this event
 
   //Corrections setting methods
@@ -96,7 +112,6 @@ public:
 
 
   void Fatal();//overload this stupid inherited method
-
 
 private:
   void shiftCor(); //method to apply the shift corections
